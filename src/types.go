@@ -6,13 +6,21 @@ type RunArgs struct {
 	path            string
 	mergeOutputPath string
 	ffmpegPath      string
+	deleteTempFile  bool
 }
 type VideoDir struct {
 	m4sPath       []string
 	videoInfoPath string
 }
 type VideoInfo struct {
+	/**
+	视频标题
+	*/
 	Title string `json:"title"`
+	/**
+	封面图
+	*/
+	CoverPath string `json:"coverPath"`
 }
 
 func (r *VideoDir) appendM4s(path string) {

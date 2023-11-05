@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 )
 
@@ -104,6 +105,10 @@ func parseVideoInfo(path string) (VideoInfo, error) {
 		fmt.Println("解析.videoInfo失败", err)
 		return VideoInfo{}, err
 	}
+	coverImageState, err := os.Stat(videoInfo.CoverPath)
+	if err != nil || coverImageState.Size() == 0 {
+		videoInfo.CoverPath = ""
+	}
 	videoInfo.Title = removeInvalidCharFromPathname(videoInfo.Title)
 	return videoInfo, nil
 }
@@ -134,18 +139,28 @@ func isInvalidChar(char rune) bool {
 	return false
 }
 
-func mergeToMp4(video VideoDir, targetPath string) error {
-	targetStat, err := os.Stat(targetPath)
-	if err == nil && targetStat.Size() != 0 {
-		// 文件已存在
-		fmt.Println("目标文件已存在，跳过", targetPath)
-		return nil
-	}
+func mergeToMp4(video VideoDir, targetPath string, coverImagePath string) error {
+
+	inputStreamCount := 0
+	// Example: ffmpeg -i cover.jpg -i audio.m4s -i video.m4s -map 0 -map 1 -map 2 -codec copy -disposition:v:0 attached_pic output.mp4
 	var params []string
+	if coverImagePath != "" {
+		params = append(params, "-i", coverImagePath)
+		inputStreamCount++
+	}
 	for _, m4s := range video.m4sPath {
 		params = append(params, "-i", m4s)
+		inputStreamCount++
 	}
-	params = append(params, "-codec", "copy", targetPath)
+	for i := 0; i < inputStreamCount; i++ {
+		params = append(params, "-map", strconv.Itoa(i))
+	}
+	params = append(params, "-codec", "copy")
+	if coverImagePath != "" {
+		params = append(params, "-disposition:v:0", "attached_pic")
+	}
+	params = append(params, targetPath)
+
 	fmt.Println("进行ffmpeg转换", params)
 	cmd := exec.Command("ffmpeg", params...)
 	output, err := cmd.Output()
