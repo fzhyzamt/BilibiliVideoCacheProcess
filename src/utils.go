@@ -7,6 +7,8 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"strings"
 )
 
 func getFFMPEG() (string, error) {
@@ -103,13 +105,42 @@ func parseVideoInfo(path string) (VideoInfo, error) {
 		fmt.Println("解析.videoInfo失败", err)
 		return VideoInfo{}, err
 	}
+	videoInfo.Title = removeInvalidCharFromPathname(videoInfo.Title)
 	return videoInfo, nil
+}
+
+func removeInvalidCharFromPathname(pathname string) string {
+	var builder strings.Builder
+	builder.Grow(len(pathname))
+
+	for _, char := range pathname {
+		if isInvalidChar(char) {
+			builder.WriteRune('_')
+		} else {
+			builder.WriteRune(char)
+		}
+	}
+
+	return builder.String()
+}
+
+// 检查字符是否在字符数组中
+func isInvalidChar(char rune) bool {
+	invalidChars := []rune{'/', '\\', ':', '*', '?', '"', '<', '>', '|'}
+	for _, c := range invalidChars {
+		if char == c {
+			return true
+		}
+	}
+	return false
 }
 
 func mergeToMp4(video VideoDir, targetPath string) error {
 	targetStat, err := os.Stat(targetPath)
+	println(filepath.Abs(targetPath))
 	if err == nil && targetStat.Size() != 0 {
 		// 文件已存在
+		fmt.Println("目标文件已存在，跳过", targetPath)
 		return nil
 	}
 	var params []string
