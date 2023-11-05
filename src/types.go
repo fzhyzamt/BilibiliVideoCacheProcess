@@ -1,6 +1,10 @@
 package main
 
-import "path/filepath"
+import (
+	"fmt"
+	"path/filepath"
+	"strconv"
+)
 
 type RunArgs struct {
 	path            string
@@ -8,6 +12,18 @@ type RunArgs struct {
 	ffmpegPath      string
 	deleteTempFile  bool
 }
+
+func (args RunArgs) String() string {
+	return fmt.Sprintf("执行参数：\n"+
+		"\t运行路径：%s\n"+
+		"\t输出目录：%s\n"+
+		"\tffmpeg：%s\n"+
+		"\t删除临时文件：%s\n\n",
+		args.path, args.mergeOutputPath,
+		args.ffmpegPath, strconv.FormatBool(args.deleteTempFile),
+	)
+}
+
 type VideoDir struct {
 	m4sPath       []string
 	videoInfoPath string

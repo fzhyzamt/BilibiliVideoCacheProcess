@@ -16,7 +16,7 @@ func main() {
 		fmt.Println("初始化配置失败", err)
 		return
 	}
-	fmt.Println("Args", args)
+	fmt.Println(args.String())
 
 	videoDirArray, err := eachCollectVideoInfoByArgs(args)
 	if err != nil {
@@ -25,12 +25,14 @@ func main() {
 	}
 
 	for _, videoDir := range videoDirArray {
+		fmt.Printf("处理开始 %s\n", videoDir)
 		err := processOneVideoDir(args, videoDir)
 		if err != nil {
 			fmt.Printf("处理文件 %s 时发生错误: %v\n", videoDir, err)
-			return
+		} else {
+			fmt.Printf("处理结束 %s \n", videoDir)
 		}
-		fmt.Printf("文件 %s 处理完成\n", videoDir)
+		fmt.Printf("%s\n\n", strings.Repeat("-", 70))
 	}
 }
 
@@ -122,7 +124,7 @@ func processOneVideoDir(args RunArgs, oneVideo VideoDir) error {
 		newM4sFileArray = append(newM4sFileArray, processedFile)
 	}
 	oneVideo.m4sPath = newM4sFileArray
-	return mergeToMp4(oneVideo, targetVideoPathname, coverImagePath)
+	return mergeToMp4(args, oneVideo, targetVideoPathname, coverImagePath)
 }
 
 func guessTargetVideoPathname(args RunArgs, oneVideo VideoDir) (string, string) {

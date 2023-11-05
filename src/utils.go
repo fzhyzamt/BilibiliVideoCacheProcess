@@ -139,8 +139,7 @@ func isInvalidChar(char rune) bool {
 	return false
 }
 
-func mergeToMp4(video VideoDir, targetPath string, coverImagePath string) error {
-
+func mergeToMp4(args RunArgs, video VideoDir, targetPath string, coverImagePath string) error {
 	inputStreamCount := 0
 	// Example: ffmpeg -i cover.jpg -i audio.m4s -i video.m4s -map 0 -map 1 -map 2 -codec copy -disposition:v:0 attached_pic output.mp4
 	var params []string
@@ -162,12 +161,12 @@ func mergeToMp4(video VideoDir, targetPath string, coverImagePath string) error 
 	params = append(params, targetPath)
 
 	fmt.Println("进行ffmpeg转换", params)
-	cmd := exec.Command("ffmpeg", params...)
+	cmd := exec.Command(args.ffmpegPath, params...)
 	output, err := cmd.Output()
 	if err != nil {
 		fmt.Println("ffmpeg转换失败", err)
 		return err
 	}
-	fmt.Println(string(output))
+	fmt.Println("Output", string(output))
 	return nil
 }
