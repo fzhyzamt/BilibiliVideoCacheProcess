@@ -7,7 +7,6 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 )
 
@@ -137,7 +136,6 @@ func isInvalidChar(char rune) bool {
 
 func mergeToMp4(video VideoDir, targetPath string) error {
 	targetStat, err := os.Stat(targetPath)
-	println(filepath.Abs(targetPath))
 	if err == nil && targetStat.Size() != 0 {
 		// 文件已存在
 		fmt.Println("目标文件已存在，跳过", targetPath)
